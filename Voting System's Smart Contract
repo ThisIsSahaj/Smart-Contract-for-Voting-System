@@ -1,0 +1,108 @@
+ pragma solidity ^0.8.0;
+
+//making a voting contract
+
+//1 we want the ability to accept proposals and store them
+// proposal: their name, number
+
+//2 voters & voing ability
+//keep track of voting 
+
+
+
+
+
+contract Ballot {
+
+    
+    struct Voter{
+        uint vote;
+       bool voted; 
+       uint weight;
+    }
+    struct Proposal {   
+    bytes32 name; //name of each proposal
+    uint voteCount; //number of accumulated votes
+}
+
+Proposal[] public proposals;
+  
+  //mapping
+
+  mapping (address => Voter) public voters; 
+
+//   address public chairperson; 
+  
+  constructor( bytes32[] memory proposalNames) { 
+
+    //   chairperson = msg.sender; 
+      
+    //   voters[chairperson].weight = 1;
+      
+      for(uint i=0; i < proposalNames.length; i++){ 
+          proposals.push(Proposal({ 
+              name: proposalNames[i], 
+              voteCount: 0 
+              
+            })); 
+            } 
+  }
+//function for authenticate votes
+//  function giveRightToVote(address voter) public {
+//     //  require(msg.sender == voter,
+//     //          'Only the chairperson can give access to vote');
+//             //  require that the voter hasn't voted yet
+            //  require(!voters[voter].voted,
+            //  'The voter has already voted');
+
+function giveRight (address voter) public { 
+             require(!voters[voter].voted,
+             'The voter has already voted');
+
+             require(voters[voter].weight == 0);
+             voters[voter].weight = 1;
+}
+//  }
+
+//functions for voting
+
+function vote(uint proposal) public {
+    Voter storage sender = voters[msg.sender];
+    require(sender.weight != 0,'Has no right to vote');
+    require(!sender.voted, 'Already voted');
+    sender.voted = true;
+    sender.vote = proposal;
+
+    proposals[proposal].voteCount += sender.weight;
+}
+
+//functions for showing the results
+ 
+//winning
+
+function winningProposal() public view returns (uint winningProposal_) {
+
+uint winningVoteCount = 0;
+
+for (uint i = 0; i< proposals.length; i++) {
+
+    if (proposals[i].voteCount > winningVoteCount) {
+
+        winningVoteCount = proposals[i].voteCount;
+
+        winningProposal_ = i;
+    }
+}
+
+}
+
+//winner's namme
+
+function winningName() public view returns (bytes32 winningName_) {
+
+winningName_ = proposals[winningProposal()].name;
+
+}
+
+
+}
